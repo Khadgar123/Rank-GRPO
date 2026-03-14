@@ -67,6 +67,11 @@ def parse_args():
     return parser.parse_args()
 
 
+def format_conversation(example):
+    """Format the dataset as a conversation for SFTTrainer."""
+    return {"text": example["prompt"]}
+
+
 def main():
     args = parse_args()
     accelerator = Accelerator()
@@ -98,7 +103,8 @@ def main():
         dataset_num_proc=args.dataset_num_proc,
         max_seq_length=args.max_length,
         gradient_checkpointing=args.gradient_checkpointing,
-        dataset_text_field=args.dataset_text_field,
+        dataset_text_field="text",
+        formatting_func=format_conversation,
     )
 
     # Trainer
