@@ -104,7 +104,6 @@ def main():
         max_seq_length=args.max_length,
         gradient_checkpointing=args.gradient_checkpointing,
         dataset_text_field="text",
-        formatting_func=format_conversation,
     )
 
     # Trainer
@@ -113,6 +112,7 @@ def main():
         args=config,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
+        formatting_func=format_conversation,
     )
 
     accelerator.print("🚀 Training …")
