@@ -76,7 +76,13 @@ def format_example(example):
     """Format prompt + completion with chat template."""
     global _tokenizer
     messages = example["prompt"].copy()
-    messages.append({"role": "assistant", "content": example["completion"]})
+    
+    # Handle completion which may be a list with {'content': ..., 'role': ...} format
+    completion = example["completion"]
+    if isinstance(completion, list):
+        completion = completion[0]['content']
+    
+    messages.append({"role": "assistant", "content": completion})
     text = _tokenizer.apply_chat_template(messages, tokenize=False)
     return {"text": text}
 
