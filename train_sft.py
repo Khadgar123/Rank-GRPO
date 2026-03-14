@@ -31,6 +31,11 @@ def parse_args():
         default="meta-llama/Llama-3.2-3B-Instruct",
         help="Base model name or path from Hugging Face Hub.",
     )
+    core.add_argument(
+        "--dataset_text_field",
+        default="text",
+        help="The field name in the dataset containing the text to train on.",
+    )
 
     opt = parser.add_argument_group("Optimization hyperparameters")
     opt.add_argument("--learning_rate", type=float, default=5e-5, help="Initial learning rate.")
@@ -93,6 +98,7 @@ def main():
         dataset_num_proc=args.dataset_num_proc,
         max_seq_length=args.max_length,
         gradient_checkpointing=args.gradient_checkpointing,
+        dataset_text_field=args.dataset_text_field,
     )
 
     # Trainer
