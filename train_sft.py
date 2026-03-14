@@ -68,8 +68,10 @@ def parse_args():
 
 
 def format_conversation(example):
-    """Format the dataset as a conversation for SFTTrainer."""
-    return {"text": example["prompt"]}
+    """Format prompt + completion as a conversation for SFTTrainer."""
+    messages = example["prompt"].copy()
+    messages.append({"role": "assistant", "content": example["completion"]})
+    return {"text": messages}
 
 
 def main():
@@ -103,7 +105,6 @@ def main():
         dataset_num_proc=args.dataset_num_proc,
         max_seq_length=args.max_length,
         gradient_checkpointing=args.gradient_checkpointing,
-        dataset_text_field="text",
     )
 
     # Trainer
