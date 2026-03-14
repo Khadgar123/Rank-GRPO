@@ -54,3 +54,7 @@ def evaluate_direct_match(item, k, seen_field, rec_field, gt_field, gt_catalog):
     recall = recall_at_k(hits, num_gt, k)
     ndcg = ndcg_at_k(hits, num_gt, k)
     return recall, ndcg
+
+
+# Alias for backwards compatibility
+evaluate_direct_match_truncate = evaluate_direct_match
