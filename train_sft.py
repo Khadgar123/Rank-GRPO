@@ -4,10 +4,15 @@ import argparse
 from datasets import load_from_disk
 from accelerate import Accelerator
 from trl import SFTConfig, SFTTrainer
+from transformers import AutoTokenizer
 
 sys.path.append("libs")
 from utils import process_rec_raw
 from metrics import evaluate_direct_match_truncate
+
+
+# Global tokenizer for formatting functions
+_tokenizer = None
 
 
 def parse_args():
@@ -67,14 +72,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def format_conversation(example):
-    """Format prompt + completion as a conversation for SFTTrainer."""
+def format_example(example):
+    """Format prompt + completion with chat template."""
+    global _tokenizer
     messages = example["prompt"].copy()
     messages.append({"role": "assistant", "content": example["completion"]})
-    return {"text": messages}
+    text = _tokenizer.apply_chat_template(messages, tokenize=False)
+    return {"text": text}
 
 
 def main():
+    global _tokenizer
     args = parse_args()
     accelerator = Accelerator()
     os.environ["WANDB_PROJECT"] = "sft-rec-uva"
@@ -83,6 +91,24 @@ def main():
     accelerator.print(f"📚 Loading datasets from {args.dataset_path}")
     train_dataset = load_from_disk(os.path.join(args.dataset_path, "train"))
     val_dataset = load_from_disk(os.path.join(args.dataset_path, "validation"))
+
+    # Load tokenizer to apply chat template
+    _tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+
+    # Format dataset with chat template
+    accelerator.print("📝 Formatting dataset with chat template...")
+    train_dataset = train_dataset.map(
+        format_example,
+        batched=False,
+        num_proc=1,
+        desc="Formatting train dataset"
+    )
+    val_dataset = val_dataset.map(
+        format_example,
+        batched=False,
+        num_proc=1,
+        desc="Formatting validation dataset"
+    )
 
     # SFT configuration
     config = SFTConfig(
@@ -105,6 +131,7 @@ def main():
         dataset_num_proc=args.dataset_num_proc,
         max_seq_length=args.max_length,
         gradient_checkpointing=args.gradient_checkpointing,
+        dataset_text_field="text",
     )
 
     # Trainer
@@ -113,7 +140,6 @@ def main():
         args=config,
         train_dataset=train_dataset,
         eval_dataset=val_dataset,
-        formatting_func=format_conversation,
     )
 
     accelerator.print("🚀 Training …")
