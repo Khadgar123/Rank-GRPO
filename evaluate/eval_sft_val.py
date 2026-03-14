@@ -18,8 +18,8 @@ from libs.log_wandb import merge_and_upload
 
 # loading from the global libs for evaluation
 sys.path.insert(0, "../../libs")
-from utils import process_rec_raw
-from metrics import evaluate_direct_match_truncate
+from libs.utils import process_rec_raw
+from libs.metrics import evaluate_direct_match
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Evaluate SFT training and outputs.")
@@ -129,7 +129,7 @@ def main():
         for k in k_list:
             recall_k, ndcg_k = [], []
             for item in tqdm(test_data_with_rec, desc=f"Step {step} Top-{k}"):
-                r, n = evaluate_direct_match_truncate(
+                r, n = evaluate_direct_match(
                     item, k,
                     seen_field="seen_titles",
                     rec_field=rec_field,
