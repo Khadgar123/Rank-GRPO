@@ -78,7 +78,7 @@ def main():
         if step in llm_outputs:
             continue
         print(f"Processing step {step} ...")
-        model_to_load = args.model_name if step == 0 else model_path_tmpl.format(step)
+        model_to_load = model_path_tmpl.format(400) if step == 0 else model_path_tmpl.format(step)
         llm = LLM(model=model_to_load,
                   tensor_parallel_size=1,
                   gpu_memory_utilization=0.8,
