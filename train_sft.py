@@ -91,7 +91,7 @@ def main():
         lr_scheduler_type=args.lr_scheduler_type,
         seed=args.seed,
         dataset_num_proc=args.dataset_num_proc,
-        max_length=args.max_length,
+        max_seq_length=args.max_length,
         gradient_checkpointing=args.gradient_checkpointing,
     )
 
